@@ -27,7 +27,7 @@ func TestRuneTrieRoot(t *testing.T) {
 	}
 	trie.Put("", "root")
 	if !trie.isLeaf() {
-		t.Error("root should not have children, only value")
+		t.Error("root should not have Children, only Value")
 	}
 }
 
@@ -88,7 +88,7 @@ func TestPathTrieRoot(t *testing.T) {
 	}
 	trie.Put("", "root")
 	if !trie.isLeaf() {
-		t.Error("root should not have children, only value")
+		t.Error("root should not have Children, only Value")
 	}
 }
 
@@ -130,7 +130,7 @@ func testTrie(t *testing.T, trie Trier) {
 	// get missing keys
 	for _, c := range cases {
 		if value := trie.Get(c.key); value != nil {
-			t.Errorf("expected key %s to be missing, found value %v", c.key, value)
+			t.Errorf("expected key %s to be missing, found Value %v", c.key, value)
 		}
 	}
 
@@ -144,14 +144,14 @@ func testTrie(t *testing.T, trie Trier) {
 	// subsequent put
 	for _, c := range cases {
 		if isNew := trie.Put(c.key, c.value); isNew {
-			t.Errorf("expected key %s to have a value already", c.key)
+			t.Errorf("expected key %s to have a Value already", c.key)
 		}
 	}
 
 	// get
 	for _, c := range cases {
 		if value := trie.Get(c.key); value != c.value {
-			t.Errorf("expected key %s to have value %v, got %v", c.key, c.value, value)
+			t.Errorf("expected key %s to have Value %v, got %v", c.key, c.value, value)
 		}
 	}
 
@@ -173,7 +173,7 @@ func testTrie(t *testing.T, trie Trier) {
 	// get deleted keys
 	for _, c := range cases {
 		if value := trie.Get(c.key); value != nil {
-			t.Errorf("expected key %s to be deleted, got value %v", c.key, value)
+			t.Errorf("expected key %s to be deleted, got Value %v", c.key, value)
 		}
 	}
 }
@@ -199,32 +199,32 @@ func testNilBehavior(t *testing.T, trie Trier) {
 	// get nil
 	for _, key := range expectNilValues {
 		if value := trie.Get(key); value != nil {
-			t.Errorf("expected key %s to have value nil, got %v", key, value)
+			t.Errorf("expected key %s to have Value nil, got %v", key, value)
 		}
 	}
 }
 
 func testTrieRoot(t *testing.T, trie Trier) {
 	const firstPutValue = "first put"
-	const putValue = "value"
+	const putValue = "Value"
 
 	if value := trie.Get(""); value != nil {
-		t.Errorf("expected key '' to be missing, found value %v", value)
+		t.Errorf("expected key '' to be missing, found Value %v", value)
 	}
 	if !trie.Put("", firstPutValue) {
 		t.Error("expected key '' to be missing")
 	}
 	if trie.Put("", putValue) {
-		t.Error("expected key '' to have a value already")
+		t.Error("expected key '' to have a Value already")
 	}
 	if value := trie.Get(""); value != putValue {
-		t.Errorf("expected key '' to have value %v, got %v", putValue, value)
+		t.Errorf("expected key '' to have Value %v, got %v", putValue, value)
 	}
 	if !trie.Delete("") {
 		t.Error("expected key '' to be deleted")
 	}
 	if value := trie.Get(""); value != nil {
-		t.Errorf("expected key '' to be deleted, got value %v", value)
+		t.Errorf("expected key '' to be deleted, got Value %v", value)
 	}
 }
 
@@ -253,9 +253,9 @@ func testTrieWalk(t *testing.T, trie Trier) {
 	}
 
 	walker := func(key string, value interface{}) error {
-		// value for each walked key is correct
+		// Value for each walked key is correct
 		if value != table[key] {
-			t.Errorf("expected key %s to have value %v, got %v", key, table[key], value)
+			t.Errorf("expected key %s to have Value %v, got %v", key, table[key], value)
 		}
 		walked[key]++
 		return nil
@@ -264,7 +264,7 @@ func testTrieWalk(t *testing.T, trie Trier) {
 		t.Errorf("expected error nil, got %v", err)
 	}
 
-	// each key/value walked exactly once
+	// each key/Value walked exactly once
 	for key, walkedCount := range walked {
 		if walkedCount != 1 {
 			t.Errorf("expected key %s to be walked exactly once, got %v", key, walkedCount)
@@ -326,9 +326,9 @@ func testTrieWalkPath(t *testing.T, trie Trier) {
 	}
 
 	walker := func(key string, value interface{}) error {
-		// value for each walked key is correct
+		// Value for each walked key is correct
 		if value != table[key] {
-			t.Errorf("expected key %s to have value %v, got %v", key, table[key], value)
+			t.Errorf("expected key %s to have Value %v, got %v", key, table[key], value)
 		}
 		walked[key]++
 		return nil
@@ -337,7 +337,7 @@ func testTrieWalkPath(t *testing.T, trie Trier) {
 		t.Errorf("expected error nil, got %v", err)
 	}
 
-	// expect each key/value in path walked exactly once, and not other keys
+	// expect each key/Value in path walked exactly once, and not other keys
 	for key, walkedCount := range walked {
 		switch key {
 		case "/notes", "/notes/new", "/notes/new/noise":
@@ -357,7 +357,7 @@ func testTrieWalkPath(t *testing.T, trie Trier) {
 	if err := trie.WalkPath("/notes/new/nose", walker); err != nil {
 		t.Errorf("expected error nil, got %v", err)
 	}
-	// expect each key/value in path walked exactly once, and not other keys
+	// expect each key/Value in path walked exactly once, and not other keys
 	for key, walkedCount := range walked {
 		switch key {
 		case "/notes", "/notes/new":
@@ -413,8 +413,8 @@ func testTrieWalkPathError(t *testing.T, trie Trier) {
 	if err := trie.WalkPath("/L1/L2A/L3B", walker); err != walkerError {
 		t.Errorf("expected walker error, got %v", err)
 	}
-	// expect each key/value in path, up to error and not including key with
-	// value 99, walked exactly once, and not other keys
+	// expect each key/Value in path, up to error and not including key with
+	// Value 99, walked exactly once, and not other keys
 	var walkedTotal int
 	for key, walkedCount := range walked {
 		switch key {

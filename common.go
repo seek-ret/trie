@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-// WalkFunc defines some action to take on the given key and value during
+// WalkFunc defines some action to take on the given key and Value during
 // a Trie Walk. Returning a non-nil error will terminate the Walk.
 type WalkFunc func(key string, value interface{}) error
 
