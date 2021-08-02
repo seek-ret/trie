@@ -3,7 +3,7 @@ package trie
 // RuneTrie is a trie of runes with string keys and interface{} values.
 // Note that internal nodes have nil values so a stored nil Value will not
 // be distinguishable and will not be included in Walks.
-// Changed the value and children to exported values in order to reach them from code.
+// Changed the Value and Children to exported values in order to reach them from code.
 type RuneTrie struct {
 	Value    interface{}
 	Children map[rune]*RuneTrie

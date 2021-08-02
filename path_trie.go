@@ -8,10 +8,11 @@ package trie
 // slashes with PathSegmenter (e.g. "/a/b/c" -> "/a", "/b", "/c"). A custom
 // StringSegmenter may be used to customize how strings are segmented into
 // nodes. A classic trie might segment keys by rune (i.e. unicode points).
+// Changed the pathtrie to be with exported children.
 type PathTrie struct {
 	segmenter StringSegmenter // key segmenter, must not cause heap allocs
-	value     interface{}
-	children  map[string]*PathTrie
+	Value     interface{}
+	Children  map[string]*PathTrie
 }
 
 // PathTrieConfig for building a path trie with different segmenter
@@ -50,12 +51,12 @@ func (trie *PathTrie) newPathTrie() *PathTrie {
 func (trie *PathTrie) Get(key string) interface{} {
 	node := trie
 	for part, i := trie.segmenter(key, 0); part != ""; part, i = trie.segmenter(key, i) {
-		node = node.children[part]
+		node = node.Children[part]
 		if node == nil {
 			return nil
 		}
 	}
-	return node.value
+	return node.Value
 }
 
 // Put inserts the Value into the trie at the given key, replacing any
@@ -66,19 +67,19 @@ func (trie *PathTrie) Get(key string) interface{} {
 func (trie *PathTrie) Put(key string, value interface{}) bool {
 	node := trie
 	for part, i := trie.segmenter(key, 0); part != ""; part, i = trie.segmenter(key, i) {
-		child, _ := node.children[part]
+		child, _ := node.Children[part]
 		if child == nil {
-			if node.children == nil {
-				node.children = map[string]*PathTrie{}
+			if node.Children == nil {
+				node.Children = map[string]*PathTrie{}
 			}
 			child = trie.newPathTrie()
-			node.children[part] = child
+			node.Children[part] = child
 		}
 		node = child
 	}
 	// does node have an existing Value?
-	isNewVal := node.value == nil
-	node.value = value
+	isNewVal := node.Value == nil
+	node.Value = value
 	return isNewVal
 }
 
@@ -90,27 +91,27 @@ func (trie *PathTrie) Delete(key string) bool {
 	node := trie
 	for part, i := trie.segmenter(key, 0); part != ""; part, i = trie.segmenter(key, i) {
 		path = append(path, nodeStr{part: part, node: node})
-		node = node.children[part]
+		node = node.Children[part]
 		if node == nil {
 			// node does not exist
 			return false
 		}
 	}
 	// delete the node Value
-	node.value = nil
+	node.Value = nil
 	// if leaf, remove it from its parent's Children map. Repeat for ancestor path.
 	if node.isLeaf() {
 		// iterate backwards over path
 		for i := len(path) - 1; i >= 0; i-- {
 			parent := path[i].node
 			part := path[i].part
-			delete(parent.children, part)
+			delete(parent.Children, part)
 			if !parent.isLeaf() {
 				// parent has other Children, stop
 				break
 			}
-			parent.children = nil
-			if parent.value != nil {
+			parent.Children = nil
+			if parent.Value != nil {
 				// parent has a Value, stop
 				break
 			}
@@ -132,23 +133,23 @@ func (trie *PathTrie) Walk(walker WalkFunc) error {
 // key/Value. If the walker function returns an error, the walk is aborted.
 func (trie *PathTrie) WalkPath(key string, walker WalkFunc) error {
 	// Get root Value if one exists.
-	if trie.value != nil {
-		if err := walker("", trie.value); err != nil {
+	if trie.Value != nil {
+		if err := walker("", trie.Value); err != nil {
 			return err
 		}
 	}
 	for part, i := trie.segmenter(key, 0); ; part, i = trie.segmenter(key, i) {
-		if trie = trie.children[part]; trie == nil {
+		if trie = trie.Children[part]; trie == nil {
 			return nil
 		}
-		if trie.value != nil {
+		if trie.Value != nil {
 			var k string
 			if i == -1 {
 				k = key
 			} else {
 				k = key[0:i]
 			}
-			if err := walker(k, trie.value); err != nil {
+			if err := walker(k, trie.Value); err != nil {
 				return err
 			}
 		}
@@ -170,7 +171,7 @@ func (trie *PathTrie) walk(key string, walker WalkFunc) error {
 	if err := walker(key, trie); err != nil {
 		return err
 	}
-	for part, child := range trie.children {
+	for part, child := range trie.Children {
 		if err := child.walk(key+part, walker); err != nil {
 			return err
 		}
@@ -179,5 +180,5 @@ func (trie *PathTrie) walk(key string, walker WalkFunc) error {
 }
 
 func (trie *PathTrie) isLeaf() bool {
-	return len(trie.children) == 0
+	return len(trie.Children) == 0
 }
